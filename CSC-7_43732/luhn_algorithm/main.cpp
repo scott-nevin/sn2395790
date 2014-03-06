@@ -10,61 +10,74 @@
 #include <iostream>
 #include <cstdlib>
 #include <string>
+#include <ctime>
+#include <iomanip>
 using namespace std;
 
 //Global Variables and constants
 
 //Function prototypes
-string input();//Gather input
 int sumDgt(int [], int []);//get the sum of all digits
 int luhn(int);//perform luhn algorithm
+void prpLuhn(char cc[],int n);
+char rndDgit();
 
 //Begin execution here
 int main(int argc, char** argv) {
+    
+    //Seed random number generator
+    srand(static_cast<unsigned int>(time(0)));
     
     //Declare variables
     int SIZE=12;
     int array[SIZE];
     int brray[SIZE];
-    string accnt;
-    int sum, chck;
+    char ccCard[SIZE];
+    int sum, chck, val=0, inval=0;
+    float perVal, perInval;
+    
+    //loop for 1000 numbers
+    for(int i=0;i<10000;i++){
     
     //Input number using function
-    accnt = input();
+    prpLuhn(ccCard, SIZE-2);
+    
+    //Ouput card number prior to luhn operation
+    cout<<ccCard;
     
     //convert to array and validate
     for (int i=1;i<11;i++){
-        array[i]=accnt[i-1]-48;
+        array[i]=ccCard[i-1]-48;
     }
     
-    //Get the sum of all digits
-    sum = sumDgt(array,brray);
-    cout<<"Sum of digits = "<<sum<<endl;
+    //Sum digits in array
+    sum = sumDgt(array, brray);
     
     //Perform Luhn Algorithm
     chck = luhn(sum);
-    array[11] = chck;
     
     //Test and ouput 
-    if(array[11]==0){
-        cout<<"This is a valid account number"<<endl;
+    if(chck==array[10]){
+        cout<<"  check = "<<chck<<"  - Valid"<<endl;
+        val++;
     }
-    else
-        cout<<"This is not a valid account number"<<endl;
+    else{
+        cout<<"  check = "<<chck<<"  - Invalid"<<endl;
+        inval++;
+    }
+}
+    
+    //set percentages
+    perVal = val / 100.0;
+    perInval = inval / 100.0;
+    
+    //Display results
+    cout<<"This program generated "<<val<<" valid card numbers "<<endl;
+    cout<<"and "<<inval<<" invalid card numbers."<<endl;
+    cout<<setprecision(2)<<showpoint<<fixed<<perVal<<"% valid, "<<perInval<<"% invalid."<<endl;
 
     //Exit stage right
     return 0;
-}
-
-string input(){
-    
-    string a;
-    
-    //Input number
-    cout<<"Input 10 digit account number: "<<endl;
-    cin>>a;
-    
-    return a;
 }
 
 int sumDgt(int a[], int b[]){
@@ -80,13 +93,9 @@ int sumDgt(int a[], int b[]){
     //Double every other digit
     for(int i=0;i<11;i++){
         
-        //Test digits and double/sum appropriately
-        if (a[i]<5) b[i]*=2;
-        else if (a[i]==5) b[i]=1;
-        else if (a[i]==6) b[i]=3;
-        else if (a[i]==7) b[i]=5;
-        else if (a[i]==8) b[i]=7;
-        else if (a[i]==9) b[i]=9;
+        //Test and double 
+        b[i]*=2;
+        if (b[i]>9) b[i]-=9;
             
         i++;
     }   
@@ -106,7 +115,22 @@ int luhn(int s){
     
     //Multiply by 9 then mod 10
     c = s * 9 % 10;
-    cout<<"Check digit = "<<c<<endl;
+    //cout<<"Check digit = "<<c<<endl;
     
     return c;  
+}
+
+void prpLuhn(char cc[],int n){
+    //Create a random cc in prep for Luhn checksum
+    for(int i=0;i<n;i++){
+        cc[i]=rndDgit();
+    }
+    //Put null terminator at the end
+    for(int i=n;i<=n+1;i++){
+        cc[i]='\0';
+    }
+}
+
+char rndDgit(){
+    return rand()%10+48;
 }
